@@ -1,0 +1,21 @@
+# ── Core AI / LangChain 
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-openai>=0.1.0
+openai>=1.0.0
+
+# ── Tools 
+duckduckgo-search>=6.1.0      # free web search, no API key needed
+numexpr>=2.9.0                # safe math evaluation for calculator tool
+
+# ── Database 
+# sqlite3 is built into Python — no install needed
+
+# ── Data generation (seed script only) 
+faker>=24.0.0                 # generates fake employee names, dates etc.
+
+# ── UI 
+streamlit>=1.32.0
+
+# ── Environment / config 
+python-dotenv>=1.0.0          # loads .env file into os.environ

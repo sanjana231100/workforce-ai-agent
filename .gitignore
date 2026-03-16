@@ -1,0 +1,31 @@
+# ── API keys — NEVER commit this file
+.env
+
+# ── Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Virtual environments
+.venv/
+venv/
+env/
+
+# ── Egg / build artifacts
+*.egg-info/
+dist/
+build/
+
+# ── macOS
+.DS_Store
+
+# ── VS Code 
+.vscode/settings.json
+
+# ── Jupyter (if you experiment in notebooks) 
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Logs 
+*.log

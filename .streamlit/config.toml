@@ -1,0 +1,16 @@
+[theme]
+# Dark theme matching the project's aesthetic
+base = "dark"
+primaryColor = "#9b7dff"
+backgroundColor = "#0d0f14"
+secondaryBackgroundColor = "#161920"
+textColor = "#e8ecf4"
+font = "sans serif"
+
+[server]
+# Local development settings
+headless = true
+port = 8501
+
+[browser]
+gatherUsageStats = false
