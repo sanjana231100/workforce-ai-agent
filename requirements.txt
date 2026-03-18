@@ -5,7 +5,7 @@ langchain-openai>=0.1.0
 openai>=1.0.0
 
 # ── Tools 
-duckduckgo-search>=6.1.0      # free web search, no API key needed
+ddgs>=6.0.0    # free web search, no API key needed
 numexpr>=2.9.0                # safe math evaluation for calculator tool
 
 # ── Database 
