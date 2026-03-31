@@ -10,18 +10,22 @@ st.set_page_config(
 
 # ── Session state initialisation ──────────────────────────────────────────────
 
-if "agent" not in st.session_state:
-    st.session_state.agent = create_agent()
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = str(uuid.uuid4())
 
-# Tracks the steps for the most recent response only
 if "latest_steps" not in st.session_state:
     st.session_state.latest_steps = []
+
+if "web_search_enabled" not in st.session_state:
+    st.session_state.web_search_enabled = True
+
+if "agent" not in st.session_state:
+    st.session_state.agent = create_agent(
+        web_search_enabled=st.session_state.web_search_enabled
+    )
 
 
 # ── Functions ─────────────────────────────────────────────────────────────────
@@ -65,14 +69,21 @@ def process_question(question: str):
         st.write(answer)
         render_cot_trace(steps)
 
-    # Save message without steps — old messages never show the trace
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer,
     })
-
-    # Store steps separately — only the latest response shows them
     st.session_state.latest_steps = steps
+
+
+def reset_agent():
+    """Recreates the agent with the current web search setting."""
+    st.session_state.agent = create_agent(
+        web_search_enabled=st.session_state.web_search_enabled
+    )
+    st.session_state.messages = []
+    st.session_state.latest_steps = []
+    st.session_state.thread_id = str(uuid.uuid4())
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -83,6 +94,29 @@ with st.sidebar:
 
     st.divider()
 
+    # Web search toggle
+    st.markdown("**Settings**")
+    web_search_on = st.toggle(
+        "Enable web search",
+        value=st.session_state.web_search_enabled,
+        help="When on, the agent can search the web for real-time information.",
+    )
+
+    # Recreate agent if the toggle changed
+    if web_search_on != st.session_state.web_search_enabled:
+        st.session_state.web_search_enabled = web_search_on
+        reset_agent()
+        st.rerun()
+
+    # Show which tools are active
+    if st.session_state.web_search_enabled:
+        st.caption("🟢 SQL  🟢 Calculator  🟢 Web search")
+    else:
+        st.caption("🟢 SQL  🟢 Calculator  🔴 Web search")
+
+    st.divider()
+
+    # Example questions
     st.markdown("**Example questions**")
     example_questions = [
         "How many contractors in Engineering earn above $80k?",
@@ -93,17 +127,24 @@ with st.sidebar:
         "What percentage of staff are contractors?",
     ]
 
+    if st.session_state.web_search_enabled:
+        example_questions.append(
+            "Search the web for average software engineer salary in 2024 and compare to our Engineering department"
+        )
+
     for q in example_questions:
         if st.button(q, use_container_width=True, key=q):
             st.session_state.pending_question = q
 
     st.divider()
 
+    # Conversation memory display
+    if st.session_state.messages:
+        st.markdown("**Conversation history**")
+        st.caption(f"{len([m for m in st.session_state.messages if m['role'] == 'user'])} questions asked")
+
     if st.button("🗑️ Clear conversation", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.latest_steps = []
-        st.session_state.thread_id = str(uuid.uuid4())
-        st.session_state.agent = create_agent()
+        reset_agent()
         st.rerun()
 
     st.divider()
@@ -115,15 +156,14 @@ with st.sidebar:
 st.title("Workforce AI Agent")
 st.caption("Ask anything about the workforce database — salaries, departments, headcount, contractors.")
 
-# Render all previous messages — no CoT trace for old messages
+# Render all previous messages without CoT trace
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
 # Show CoT trace only for the latest assistant response
 if st.session_state.latest_steps and st.session_state.messages:
-    last_msg = st.session_state.messages[-1]
-    if last_msg["role"] == "assistant":
+    if st.session_state.messages[-1]["role"] == "assistant":
         render_cot_trace(st.session_state.latest_steps)
 
 # Handle sidebar example button clicks
@@ -135,7 +175,7 @@ if "pending_question" in st.session_state:
         st.write(question)
     process_question(question)
 
-# Chat input at the bottom
+# Chat input
 if question := st.chat_input("Ask about the workforce..."):
     st.session_state.messages.append({"role": "user", "content": question})
     st.session_state.latest_steps = []

@@ -4,24 +4,32 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
-from tools import tools
+from tools import tools, web_search, sql_query, get_db_schema, calculator
 
 load_dotenv()
 
+# Tools without web search — used when web search mode is off
+db_only_tools = [sql_query, get_db_schema, calculator]
 
-def create_agent():
+# All tools including web search
+all_tools = tools
+
+
+def create_agent(web_search_enabled: bool = True):
     llm = ChatGroq(
         model="llama-3.3-70b-versatile",
         temperature=0,
         groq_api_key=os.getenv("GROQ_API_KEY"),
     )
 
-    # MemorySaver keeps conversation history across turns using LangGraph checkpoints
     memory = MemorySaver()
+
+    # Choose tool set based on web search toggle
+    active_tools = all_tools if web_search_enabled else db_only_tools
 
     agent = create_react_agent(
         model=llm,
-        tools=tools,
+        tools=active_tools,
         checkpointer=memory,
     )
 
@@ -40,10 +48,9 @@ def run_agent(agent, question: str, thread_id: str = "default") -> dict:
         config=config,
     )
 
-    # Final answer is always the last message in the list
     final_answer = result["messages"][-1].content
 
-    # Extract tool call messages for CoT display in Streamlit
+    # Extract tool call messages for CoT display
     intermediate_steps = [
         msg for msg in result["messages"]
         if not isinstance(msg, (HumanMessage, AIMessage))
@@ -71,7 +78,6 @@ if __name__ == "__main__":
         print()
         result = run_agent(agent, question)
 
-        # Print intermediate steps so you can see the ReAct trace
         for msg in result["intermediate_steps"]:
             print(f"[{msg.__class__.__name__}] {str(msg.content)[:200]}")
 
