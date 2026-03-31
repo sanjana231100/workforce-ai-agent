@@ -1,3 +1,12 @@
+---
+title: Workforce AI Agent
+emoji: 🤖
+colorFrom: purple
+colorTo: blue
+sdk: docker
+app_file: app.py
+pinned: false
+---
 # 🤖 Workforce AI Agent
 
 An intelligent ReAct agent that reasons over multiple steps to answer complex workforce questions using a local SQLite database, live web search, and a calculator.
