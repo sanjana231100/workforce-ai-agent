@@ -116,7 +116,7 @@ workforce-ai-agent/
 
 ## 🌐 Live Demo
 
-Deployed on HuggingFace Spaces: _coming in Commit 7_
+Deployed on HuggingFace Spaces: https://huggingface.co/spaces/sanjana231100/workforce-ai-agent
 
 ---
 
