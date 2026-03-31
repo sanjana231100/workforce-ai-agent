@@ -77,16 +77,20 @@ def calculator(expression: str) -> str:
     - "sum([45000, 72000, 98000]) / 3"  → manual average
     """
     try:
-        # numexpr safely evaluates math expressions without using eval()
         result = numexpr.evaluate(expression).item()
-
-        # Round to 2 decimal places if it's a float
         if isinstance(result, float):
             return str(round(result, 2))
         return str(result)
-
-    except Exception as e:
-        return f"Calculation error: {str(e)}"
+    except Exception:
+        try:
+            # fallback for expressions numexpr doesn't support
+            result = eval(expression, {"__builtins__": {}}, {})
+            if isinstance(result, float):
+                return str(round(result, 2))
+            return str(result)
+        except Exception as e:
+            return f"Calculation error: {str(e)}"
+        
 
 
 # ── Tools list — imported by agent.py ─────────────────────────────────────────

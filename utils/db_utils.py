@@ -25,7 +25,10 @@ def run_query(sql: str) -> str:
 
         # Single value result (e.g. COUNT, AVG) — return it directly
         if len(rows) == 1 and len(columns) == 1:
-            return str(rows[0][0])
+            val = rows[0][0]
+            if isinstance(val, float):
+                return str(round(val, 2))
+            return str(val)
 
         result_lines = [
             " | ".join(f"{col}: {val}" for col, val in zip(columns, row))
